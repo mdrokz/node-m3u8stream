@@ -1,4 +1,4 @@
-import { Writable } from 'stream';
+import { Writable } from 'react-native-streams';
 
 export interface Item {
   url: string;

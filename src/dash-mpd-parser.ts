@@ -1,4 +1,4 @@
-import { Writable } from 'stream';
+import { Writable } from 'react-native-streams';
 import sax from 'sax';
 import { durationStr } from './parse-time';
 import { Parser } from './parser';

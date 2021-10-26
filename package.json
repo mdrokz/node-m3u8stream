@@ -29,7 +29,7 @@
     "lint:fix": "eslint --fix ./src ./test"
   },
   "dependencies": {
-    "miniget": "^4.2.1",
+    "react-native-streams": "^1.0.5",
     "sax": "^1.2.4"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
-import { PassThrough } from 'stream';
-import miniget from 'miniget';
+import { PassThrough } from 'react-native-streams';
+import dispatchXHR from './xhr';
 import m3u8Parser from './m3u8-parser';
 import DashMPDParser from './dash-mpd-parser';
 import { Callback, Queue } from './queue';
@@ -13,7 +13,7 @@ namespace m3u8stream {
     liveBuffer?: number;
     chunkReadahead?: number;
     highWaterMark?: number;
-    requestOptions?: miniget.Options;
+    requestOptions?: any;
     parser?: 'm3u8' | 'dash-mpd';
     id?: string;
   }
@@ -62,14 +62,14 @@ let m3u8stream = ((playlistURL: string, options: m3u8stream.Options = {}): m3u8s
       Math.max(options.begin - liveBuffer, 0);
   }
 
-  const forwardEvents = (req: miniget.Stream) => {
+  const forwardEvents = (req: any) => {
     for (let event of ['abort', 'request', 'response', 'redirect', 'retry', 'reconnect']) {
       req.on(event, stream.emit.bind(stream, event));
     }
   };
 
-  let currSegment: miniget.Stream | null;
-  const streamQueue = new Queue((req: miniget.Stream, callback): void => {
+  let currSegment: any | null;
+  const streamQueue = new Queue((req: any, callback): void => {
     currSegment = req;
     // Count the size manually, since the `content-length` header is not
     // always there.
@@ -88,7 +88,7 @@ let m3u8stream = ((playlistURL: string, options: m3u8stream.Options = {}): m3u8s
         Range: `bytes=${segment.range.start}-${segment.range.end}`,
       });
     }
-    let req = miniget(new URL(segment.url, playlistURL).toString(), reqOptions);
+    let req = dispatchXHR(new URL(segment.url, playlistURL).toString(), reqOptions);
     req.on('error', callback);
     forwardEvents(req);
     streamQueue.push(req, (_, size) => {
@@ -133,13 +133,13 @@ let m3u8stream = ((playlistURL: string, options: m3u8stream.Options = {}): m3u8s
     }
   };
 
-  let currPlaylist: miniget.Stream | null;
+  let currPlaylist: any | null;
   let lastSeq: number;
   let starttime = 0;
 
   const refreshPlaylist = (): void => {
     lastRefresh = Date.now();
-    currPlaylist = miniget(playlistURL, requestOptions);
+    currPlaylist = dispatchXHR(playlistURL, requestOptions);
     currPlaylist.on('error', onError);
     forwardEvents(currPlaylist);
     const parser = currPlaylist.pipe(new Parser(options.id));
